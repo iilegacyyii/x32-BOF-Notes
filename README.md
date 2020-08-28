@@ -6,12 +6,12 @@ Note: many functions that take an input from stdin will keep on reading until th
 
 ## Generating Cyclic Patterns
 
-Using metasploit:
+**Using metasploit**
 ```
 msf-pattern_create -l 1024
 ```
 
-Using pwntools:
+**Using pwntools**
 ```py
 from pwn import *
 cyclic(1024)
