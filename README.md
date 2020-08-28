@@ -13,7 +13,7 @@ Once you have found the vulnerable input, you can use a debugger to check which 
 msf-pattern_create -l 1024
 ```
 
-**Using pwntools**
+**Using pwntools**  
 The first method here is preferred as you can also search the pattern
 ```py
 import pwn
