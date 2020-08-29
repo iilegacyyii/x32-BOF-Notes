@@ -68,7 +68,7 @@ pattern.find(ValueInEIP)
 **Using vanilla python**
 ```py
 # pattern is a string containing the cyclic pattern,
-# unique can be in the format \x61\x6d\x62\x61 or amba
+# unique must be in ASCII format.
 unique = input("Enter the value stored in EIP: ")
 
 if unique in pattern:
@@ -76,4 +76,10 @@ if unique in pattern:
 	print("Your offset is {}, meaning your EIP value is located at character {} and onwards.".format(offset, offset+1))
 else:
 	print("EIP value not found in cyclic pattern...")
+```
+
+**Using mona with Immunity Debugger**
+Once you've got a segfault using your pattern, you can use the following command:
+```bash
+!mona findmsp
 ```
