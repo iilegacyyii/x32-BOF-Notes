@@ -125,7 +125,7 @@ for i in range(0x00, 0xFF + 1):	# range(0x00, 0xFF) only returns up to 0xFE
 	if i not in badchars:
 		badchar_test += chr(i)
 ```
-
+  
 ###Looking at memory
 When looking at memory, you're really looking for the data stored inside of the stack, this data should read from 0x00 to 0xFF (obviously excluding your bad characters). If you find that your input doesn't look quite right in memory, try removing the character that seems to be causing the issue. This could be truncating your input, or even just being replaced with another byte. Either way, remove it!
 
@@ -135,7 +135,7 @@ You can automate this process a bit through use of this mona command inside of I
 ```bash
 !mona compare -a esp -f c:\badchar_test.bin
 ```
-When the window pops up, status unmodified means that there are no more bad characters for you to remove.
+When the window pops up, status unmodified means that there are no more bad characters for you to remove.  
 ###Locating jump esp  
 The reason to locate a jump esp is because of the way we are structuring our payload; our shellcode will be stored in the stack at the location specified by the value stored in esp. So by overwriting eip to an address of a jmp esp gadget, we will be jumping directly to the address stored in esp and start executing our shellcode.
 
