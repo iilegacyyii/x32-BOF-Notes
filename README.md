@@ -136,11 +136,10 @@ You can automate this process a bit through use of this mona command inside of I
 !mona compare -a esp -f c:\badchar_test.bin
 ```
 When the window pops up, status unmodified means that there are no more bad characters for you to remove.
-
-###Locating jump esp
+###Locating jump esp  
 The reason to locate a jump esp is because of the way we are structuring our payload; our shellcode will be stored in the stack at the location specified by the value stored in esp. So by overwriting eip to an address of a jmp esp gadget, we will be jumping directly to the address stored in esp and start executing our shellcode.
 
-To locate the jmp esp gadget, you can use a variety of methods. The simplest is by disassembling and/or debugging the binary and searching for yourself. In addition to this certain tools have functionalities which enable the user to search for gadgets automatically.
+To locate the jmp esp gadget, you can use a variety of methods. The simplest is by disassembling and/or debugging the binary and searching for yourself. In addition to this certain tools have functionalities which enable the user to search for gadgets automatically.  
 **Using mona with Immunity Debugger**
 ```bash
 !mona jmp -r esp -cpb "\x00\x0A"
@@ -148,10 +147,7 @@ To locate the jmp esp gadget, you can use a variety of methods. The simplest is 
 
 ------------------------------
 
-##Generating Payload
-
-
-
+##Generating Payload  
 ```bash
 msfvenom -p windows/exec -b '\x00\x0A' -f python --var-name shellcode_calc CMD=calc.exe EXITFUNC=thread
 ```
