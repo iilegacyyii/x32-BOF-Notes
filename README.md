@@ -5,11 +5,15 @@ This cheat sheet assumes that the binary doesn't have ASLR enabled, meaning you 
 
 To keep it simple, the steps of the Steps of this attack are as follows:
 
-1. Fuzzing and finding eip position
-2. Finding bad chars (commonly 0x00 and 0x0A)
-3. Locating jmp esp
-4. Generating payload with msfvenom
-5. Getting reverse shell with netcat
+1. [Fuzzing][#Fuzzing]
+	- [Generating cyclic patterns][#generating-cyclic-patterns]
+	- [Finding the offset][#finding-the-offset]
+2. [Finding bad characters][#bad-characters] (commonly 0x00 and 0x0A)
+	- [Generating all characters][#generating-all-characters]
+	- [Looking at memory][#looking-at-memory]
+3. [Locating jmp esp][#locating-jmp-esp]
+4. [Generating payload][#generating-payload]
+5. [Getting reverse shell][#getting-reverse-shell]
 
 ------------------------------
 
@@ -98,6 +102,7 @@ Once you've got a segfault using your pattern, you can use the following command
 ```bash
 !mona findmsp
 ```
+This command will search memory for cyclic patterns and read you the value in eip, esp and ebp. It will
 
 ------------------------------
 
@@ -109,7 +114,8 @@ However each binary will have it's own for you to discover.
 
 The easiest way to check for bad characters is sending every character to the application and using a debugger such as Immunity Debugger to check for changes to the sent payload in memory. The first step of course is to generate
 
-**Generating all characters**
+###Generating all characters
+This python snippet will allow you to easily generate all characters from 0x00 to 0xFF excluding any characters you insert into the badchars list.
 ```py
 # Generate pattern for badchar detection.
 badchar_test = ""
@@ -120,12 +126,32 @@ for i in range(0x00, 0xFF + 1):	# range(0x00, 0xFF) only returns up to 0xFE
 		badchar_test += chr(i)
 ```
 
-**Using mona within Immunity Debugger**
-Assuming that your payload is located at the location pointed to by esp
-```
+###Looking at memory
+When looking at memory, you're really looking for the data stored inside of the stack, this data should read from 0x00 to 0xFF (obviously excluding your bad characters). If you find that your input doesn't look quite right in memory, try removing the character that seems to be causing the issue. This could be truncating your input, or even just being replaced with another byte. Either way, remove it!
+
+There are many debuggers you can use to look through memory, personally for windows I use Immunity Debugger but anything else works too.
+
+You can automate this process a bit through use of this mona command inside of Immunity Debugger to compare the bytes inside of a specified file to the data in memory that is located at the address stored in esp.
+```bash
 !mona compare -a esp -f c:\badchar_test.bin
 ```
 When the window pops up, status unmodified means that there are no more bad characters for you to remove.
 
-**Doing it manually**
-PLACEHOLDER TEXT
+###Locating jump esp
+The reason to locate a jump esp is because of the way we are structuring our payload; our shellcode will be stored in the stack at the location specified by the value stored in esp. So by overwriting eip to an address of a jmp esp gadget, we will be jumping directly to the address stored in esp and start executing our shellcode.
+
+To locate the jmp esp gadget, you can use a variety of methods. The simplest is by disassembling and/or debugging the binary and searching for yourself. In addition to this certain tools have functionalities which enable the user to search for gadgets automatically.
+**Using mona with Immunity Debugger**
+```bash
+!mona jmp -r esp -cpb "\x00\x0A"
+```
+
+------------------------------
+
+##Generating Payload
+
+
+
+```bash
+msfvenom -p windows/exec -b '\x00\x0A' -f python --var-name shellcode_calc CMD=calc.exe EXITFUNC=thread
+```
