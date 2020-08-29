@@ -2,7 +2,9 @@
 One of the most crucial steps when working on buffer overflows is checking for bad characters.  
 Bad characters are characters that the binary will treat differently to others, and can either change the functionality or even completely truncate your payload, rendering it useless.
 The most common are 0x00 and 0x0a, (null byte and newline), this is because many buffer overflows rely on input from stdin and most c functions that take input from stdin use either 0x00 or 0x0a to detect the end of an input.
-however each binary will have it's own for you to discover.
+However each binary will have it's own for you to discover.
+
+The easiest way to check for bad characters is sending every character to the application and using a debugger such as Immunity Debugger to check for changes to the sent payload in memory.
 
 **Generating all characters**
 ```py

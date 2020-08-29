@@ -28,7 +28,7 @@ pwn.cyclic(1024)
 
 **Using vanilla python**
 ```py
-def gen_pattern(length=64):
+def gen_pattern(length=64):     # Generates a cyclic pattern of default length 64 characters
     chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
     pattern = "aaaa"
     while len(pattern) < length:
