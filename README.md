@@ -5,15 +5,15 @@ This cheat sheet assumes that the binary doesn't have ASLR enabled, meaning you 
 
 To keep it simple, the steps of the Steps of this attack are as follows:
 
-1. [Fuzzing][#Fuzzing]
-	- [Generating cyclic patterns][#generating-cyclic-patterns]
-	- [Finding the offset][#finding-the-offset]
-2. [Finding bad characters][#bad-characters] (commonly 0x00 and 0x0A)
-	- [Generating all characters][#generating-all-characters]
-	- [Looking at memory][#looking-at-memory]
-3. [Locating jmp esp][#locating-jmp-esp]
-4. [Generating payload][#generating-payload]
-5. [Getting reverse shell][#getting-reverse-shell]
+1. [Fuzzing](#Fuzzing)
+	- [Generating cyclic patterns](#generating-cyclic-patterns)
+	- [Finding the offset](#finding-the-offset)
+2. [Finding bad characters](#bad-characters) (commonly 0x00 and 0x0A)
+	- [Generating all characters](#generating-all-characters)
+	- [Looking at memory](#looking-at-memory)
+3. [Locating jmp esp](#locating-jmp-esp)
+4. [Generating payload](#generating-payload)
+5. [Getting reverse shell](#getting-reverse-shell)
 
 ------------------------------
 
