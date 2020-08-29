@@ -47,7 +47,8 @@ def gen_pattern(length=64):
             continue
         else:
             pattern += lchars[0] + lchars[1] + lchars[2] + chars[chars.find(lchars[3]) + 1]
-    return pattern[:length]```
+    return pattern[:length]
+```
 
 ## Finding the Offset
 If using metasploit or pwntools you can enter either the raw hex value stored in EIP or the ASCII equivilent e.g. 0x616d6261 or "amba"
