@@ -114,7 +114,7 @@ However each binary will have it's own for you to discover.
 
 The easiest way to check for bad characters is sending every character to the application and using a debugger such as Immunity Debugger to check for changes to the sent payload in memory. The first step of course is to generate
 
-###Generating all characters
+### Generating all characters
 This python snippet will allow you to easily generate all characters from 0x00 to 0xFF excluding any characters you insert into the badchars list.
 ```py
 # Generate pattern for badchar detection.
@@ -125,8 +125,8 @@ for i in range(0x00, 0xFF + 1):	# range(0x00, 0xFF) only returns up to 0xFE
 	if i not in badchars:
 		badchar_test += chr(i)
 ```
-  
-###Looking at memory
+
+### Looking at memory
 When looking at memory, you're really looking for the data stored inside of the stack, this data should read from 0x00 to 0xFF (obviously excluding your bad characters). If you find that your input doesn't look quite right in memory, try removing the character that seems to be causing the issue. This could be truncating your input, or even just being replaced with another byte. Either way, remove it!
 
 There are many debuggers you can use to look through memory, personally for windows I use Immunity Debugger but anything else works too.
@@ -135,8 +135,8 @@ You can automate this process a bit through use of this mona command inside of I
 ```bash
 !mona compare -a esp -f c:\badchar_test.bin
 ```
-When the window pops up, status unmodified means that there are no more bad characters for you to remove.  
-###Locating jump esp  
+When the window pops up, status unmodified means that there are no more bad characters for you to remove.
+### Locating jump esp
 The reason to locate a jump esp is because of the way we are structuring our payload; our shellcode will be stored in the stack at the location specified by the value stored in esp. So by overwriting eip to an address of a jmp esp gadget, we will be jumping directly to the address stored in esp and start executing our shellcode.
 
 To locate the jmp esp gadget, you can use a variety of methods. The simplest is by disassembling and/or debugging the binary and searching for yourself. In addition to this certain tools have functionalities which enable the user to search for gadgets automatically.  
@@ -147,7 +147,7 @@ To locate the jmp esp gadget, you can use a variety of methods. The simplest is 
 
 ------------------------------
 
-##Generating Payload  
+## Generating Payload
 ```bash
 msfvenom -p windows/exec -b '\x00\x0A' -f python --var-name shellcode_calc CMD=calc.exe EXITFUNC=thread
 ```
