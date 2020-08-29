@@ -26,6 +26,29 @@ import pwn
 pwn.cyclic(1024)
 ```
 
+**Using vanilla python**
+```py
+def gen_pattern(length=64):
+    chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    pattern = "aaaa"
+    while len(pattern) < length:
+        lchars = pattern[len(pattern) - 4:][0] + pattern[len(pattern) - 4:][1] + pattern[len(pattern) - 4:][2] + pattern[len(pattern) - 4:][3]
+        if lchars[0] == "9":
+            print("Maximum pattern length reached!")
+            break
+        elif lchars[1] == "9":
+            pattern += chars[chars.find(lchars[0]) + 1] + "a99"
+            continue
+        elif lchars[2] == "9":
+            pattern += "a" + chars[chars.find(lchars[1]) + 1] + "a9"
+            continue
+        elif lchars[3] == "9":
+            pattern += "aa" + chars[chars.find(lchars[2]) + 1] + "a"
+            continue
+        else:
+            pattern += lchars[0] + lchars[1] + lchars[2] + chars[chars.find(lchars[3]) + 1]
+    return pattern[:length]```
+
 ## Finding the Offset
 If using metasploit or pwntools you can enter either the raw hex value stored in EIP or the ASCII equivilent e.g. 0x616d6261 or "amba"
 
