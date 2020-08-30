@@ -95,7 +95,7 @@ else:
 	print("EIP value not found in cyclic pattern...")
 ```
 
-**Using mona with Immunity Debugger**
+**Using mona with Immunity Debugger**  
 Once you've got a segfault using your pattern, you can use the following command:
 ```bash
 !mona findmsp
