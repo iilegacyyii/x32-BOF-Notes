@@ -3,7 +3,7 @@ These are my notes for 32bit stack overflow. It is based on windows but a lot is
 
 This cheat sheet assumes that the binary doesn't have ASLR enabled, meaning you can simply ret to a `jump esp` instruction and execute shellcode from there.
 
-To keep it simple, the steps of the Steps of this attack are as follows:
+To keep it simple, the steps of this attack are as follows:
 
 1. [Fuzzing](#Fuzzing)
 	- [Generating cyclic patterns](#generating-cyclic-patterns)
@@ -68,6 +68,8 @@ def gen_pattern(length=64):     # Generates a cyclic pattern of default length 6
 ```
 
 ### Finding the Offset
+Ensure that you're using the correct pattern when you're using the offset. For example, if you're using msf to check the offset, ensure you used an msf pattern as your input to the binary.
+
 If using metasploit or pwntools you can enter either the raw hex value stored in EIP or the ASCII equivilent e.g. 0x616d6261 or "amba"
 
 **Using metasploit**
@@ -83,14 +85,15 @@ pattern.find(ValueInEIP)
 ```
 
 **Using vanilla python**
+I would double check the offset with either pwntools or msf too, those seem to be a lot more reliable.
 ```py
-# pattern is a string containing the cyclic pattern,
+# pattern is a string containing the cyclic pattern you sent to the binary,
 # unique must be in ASCII format.
 unique = input("Enter the value stored in EIP: ")
 
 if unique in pattern:
 	offset = len(pattern.split(unique)[0])
-	print("Your offset is {}, meaning your EIP value is located at character {} and onwards.".format(offset, offset+1))
+	print("Your offset is {}, meaning your EIP value is located at character {} and onwards.".format(offset + 1, offset + 2))
 else:
 	print("EIP value not found in cyclic pattern...")
 ```
@@ -127,7 +130,13 @@ When looking at memory, you're really looking for the data stored inside of the 
 
 There are many debuggers you can use to look through memory, personally for windows I use Immunity Debugger but anything else works too.
 
-You can automate this process a bit through use of this mona command inside of Immunity Debugger to compare the bytes inside of a specified file to the data in memory that is located at the address stored in esp.
+You can automate this process a bit through use of this mona command inside of Immunity Debugger to compare the bytes inside of a specified file to the data in memory that is located at the address stored in esp. Also, if you're using mona, you can use this code snippet alone with the one above to write your bytes to a file.
+
+```py
+with open("badchars.bin", "wb") as f:
+    f.write(badchar_test)
+```
+
 ```bash
 !mona compare -a esp -f c:\badchar_test.bin
 ```
