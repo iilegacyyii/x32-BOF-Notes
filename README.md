@@ -136,7 +136,7 @@ You can automate this process a bit through use of this mona command inside of I
 with open("badchars.bin", "wb") as f:
     f.write(badchar_test)
 ```
-
+Then inside Immunity Debugger run the following, changing the file path to where your .bin file is stored
 ```bash
 !mona compare -a esp -f c:\badchar_test.bin
 ```
