@@ -1,7 +1,7 @@
 # Legacyy's 32bit Stack Overflow Cheat Sheet
 These are my notes for 32bit stack overflow. It is based on windows but a lot is transferrable to linux too. :)
 
-This cheat sheet assumes that the binary doesn't have ASLR enabled, meaning you can simply ret to a `jmp esp` instruction and execute shellcode from there.
+This cheat sheet assumes that the binary doesn't have ASLR or NX enabled, meaning you can simply ret to a `jmp esp` instruction and execute shellcode from there.
 
 To keep it simple, the steps of this attack are as follows:
 
