@@ -8,7 +8,7 @@ This cheat sheet assumes that the binary doesn't have ASLR or NX enabled, meanin
 
 To keep it simple, the steps of this attack are as follows:
 
-1. [Fuzzing](#Fuzzing)
+1. [Fuzzing](#fuzzing)
 	- [Generating cyclic patterns](#generating-cyclic-patterns)
 	- [Finding the offset](#finding-the-offset)
 2. [Finding bad characters](#bad-characters) (commonly 0x00 and 0x0A)
